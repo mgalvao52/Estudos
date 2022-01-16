@@ -21,7 +21,7 @@ const product = {
     supplier:{
         type:Sequelize.INTEGER,
         allowNull:false,
-        dependences:{
+        references:{
             model:require('./supplier'),
             key:'id'
         }

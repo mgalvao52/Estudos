@@ -2,14 +2,18 @@
 const model = require('../infra/entities/product');
 
 module.exports = {
-    async getList(){
-        return await model.findAll({raw:true});
+    async getList(supplier){
+        return await model.findAll({
+            where:{
+                supplier:supplier
+            },
+            raw:true
+        });
     },
-    async getById(idProduct,idSupplier){
+    async getById(idProduct){
         return model.findOne({
             where:{
-                id:idProduct,
-                supplier:idSupplier
+                id:idProduct
             },
             raw:true
         });
@@ -18,11 +22,11 @@ module.exports = {
         return model.create(product);
     },
     update(product){
-        return model.update({
+        return model.update(
             product,
+            {
             where:{
-                id:product.id,
-                supplier:product.supplier
+                id:product.id
             }
         });
     },

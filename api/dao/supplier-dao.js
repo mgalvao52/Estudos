@@ -17,8 +17,9 @@ module.exports = {
         return model.create(supplier)
     },
     update(supplier){
-        return model.update({
+        return model.update(
             supplier,
+            {
             where:{
                 id:supplier.id
             }
