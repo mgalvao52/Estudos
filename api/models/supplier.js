@@ -1,4 +1,5 @@
 'use setrict'
+const FieldValidation = require('../custom-errors/filed-validation');
 const supplierDao = require('../dao/supplier-dao');
 class Supplier{
     constructor({id,company,email,category,createdAt,updatedAt}){
@@ -14,6 +15,7 @@ class Supplier{
         return await supplierDao.getList();
     }
     async create(){
+        this.validate();
         const result = {
             company:this.company,
             email:this.email,
@@ -43,7 +45,7 @@ class Supplier{
             }
         })
         if(Object.keys(fieldsUpdate).length === 0){
-            throw new Error('supplier can not be null');
+            throw new FieldValidation('supplier can not be null');
         }
         fieldsUpdate.id = this.id;
         await supplierDao.update(fieldsUpdate);
@@ -52,6 +54,15 @@ class Supplier{
     async delete(){
         await this.getById();
         await supplierDao.delete(this.id);
+    }
+    validate(){
+        const fields = ['company','email','category'];
+        fields.forEach(field=>{
+            const value = this[field];
+            if(!value){
+                throw new FieldValidation(`the '${field}' field is required`);
+            }
+        })
     }
 }
 

@@ -1,5 +1,6 @@
 'use strict'
-const res = require('express/lib/response');
+const FieldValidation = require('../custom-errors/filed-validation');
+const NotFound = require('../custom-errors/not-found');
 const productDao = require('../dao/product-dao');
 class Product{
     constructor({id,title,price,amount,description,createdAt,updatedAt,supplier}){
@@ -16,6 +17,7 @@ class Product{
         return productDao.getList(this.supplier);
     }
     async create(){
+        this.validate();
        const result = await productDao.create({
            title:this.title,
            price:this.price,
@@ -30,7 +32,7 @@ class Product{
     async getById(){
         const result = await productDao.getById(this.id);
         if(!result){
-            throw new Error('product not found');
+            throw new NotFound('product not found');
         }
         this.id = result.id;
         this.price = result.price;
@@ -43,18 +45,32 @@ class Product{
     }
     async update(){
         const updateFields = {}
-        if(typeof this.price === 'number' && this.price > 0){
+        
+        if(typeof this.price === 'number' && this.price >= 0){
             updateFields.price = this.price;
+        }else{
+            if(this.price){
+                throw new FieldValidation(`the 'price' field cannot be less then or equal to zero`);
+            }
         }
         if(typeof this.amount === 'number' && this.amount >= 0){
             updateFields.amount = this.amount
+        }else{
+            if(this.amount){
+                throw new FieldValidation(`the 'amount' field cannot be less then or equal to zero`)
+            }
         }
         if(typeof this.title === 'string' && this.title.length > 0){
             updateFields.title = this.title;
+        }else{
+            if(this.title){
+                throw new FieldValidation(`the 'title' field is required`)
+            }
         }
         
+
         if(Object.keys(updateFields).length === 0){
-            throw new Error('product cann´t be null');
+            throw new FieldValidation('product cannot be null');
         }
         if(this.description){
             updateFields.description = this.description;
@@ -66,6 +82,24 @@ class Product{
     async delete(){
         await this.getById();
         return await productDao.delete(this.id);
+    }
+
+    validate(){
+        if(this.price <= 0){
+            throw new FieldValidation("'price' cannot be less than or equal to zero")    
+        }
+        if(!this.price){
+            throw new FieldValidation(` the 'price' field is required `)
+        }
+        if(this.amount < 0){
+            throw new FieldValidation("'amount' cannot be less than zero")    
+        }
+        if(!this.amount){
+            throw new FieldValidation(` the 'amount' field is required `)
+        }
+        if(typeof this.title === 'string' && this.title.length <= 0){
+            throw new FieldValidation(`the 'title' field is required`)
+        }
     }
 }
 

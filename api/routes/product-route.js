@@ -1,28 +1,27 @@
 const route = require('express').Router({mergeParams:true});
 const Product = require('../models/product');
 
-route.get('/',async (request,response)=>{
+route.get('/',async (request,response,next)=>{
     try {
         const product = new Product({supplier:request.params.idSupplier});
         const result = await product.getList();
         response.status(200).send(JSON.stringify(result));
     } catch (error) {
-        console.log(error);
-        response.status(400).send({message:'request fail'});
+        next(error);
     }
 
 })
-route.get('/:id',async (request,response)=>{
+route.get('/:id',async (request,response,next)=>{
     try {
         const product = new Product({id:request.params.id});
         await product.getById();
         response.status(200).send(JSON.stringify(product));
         
     } catch (error) {
-        response.status(400).send({message:'request fail'});
+        next(error);
     }
 })
-route.post('/',async (request,response)=>{
+route.post('/',async (request,response,next)=>{
     try {
         const id= request.params.idSupplier;
         const data = Object.assign({},request.body,{supplier:id});
@@ -31,10 +30,10 @@ route.post('/',async (request,response)=>{
         response.status(200).send(JSON.stringify(product));
 
     } catch (error) {
-        response.status(400).send({message:'resquest fail'});
+        next(error);
     }
 })
-route.post('/amount',async(request,response)=>{
+route.post('/amount',async(request,response,next)=>{
     try {
         const data = request.body;
         const product = new Product(data);
@@ -43,10 +42,10 @@ route.post('/amount',async(request,response)=>{
         response.status(200).send(JSON.stringify(product));
 
     } catch (error) {
-        response.status(400).send({message:'request fail'});
+        next(error);
     }
 })
-route.put('/',async(request,response)=>{
+route.put('/',async(request,response,next)=>{
     try {
         const data = request.body;
         const idSupplier = request.params.idSupplier;
@@ -56,17 +55,16 @@ route.put('/',async(request,response)=>{
         await product.getById();
         response.status(200).send(JSON.stringify(product));
     } catch (error) {
-        console.log(error);
-        response.status(400).send({message:'request fail'});
+        next(error);
     }
 })
-route.delete('/:id',async(request,response)=>{
+route.delete('/:id',async(request,response,next)=>{
     try {
         const product = new Product({id:request.params.id});
         await product.delete();
         response.status(200).send(product);
     } catch (error) {
-        response.status(400).send({message:'request fail'});
+        next(error);
     }
 })
 
